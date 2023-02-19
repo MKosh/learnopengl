@@ -8,7 +8,7 @@ public:
 
   VBO(float* vertices, GLsizeiptr size);
 
-  void Bind();
-  void Unbind();
-  void Delete();
+  auto Bind() const -> void;
+  auto Unbind() const -> void;
+  auto Delete() const -> void;
 };

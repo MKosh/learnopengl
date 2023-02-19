@@ -1,15 +1,19 @@
 #include <cstdint>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glm/ext/matrix_transform.hpp>
 #include <iostream>
 #include <cmath>
 
-#include "../utils/stb_image.h"
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include "../utils/VBO.h"
 #include "../utils/VAO.h"
 #include "../utils/EBO.h"
 #include "../utils/shader.h"
+#include "../utils/texture.h"
 
 const uint32_t win_height = 800;
 const uint32_t win_width = 800;
@@ -21,6 +25,7 @@ float vertices[] = {
   -0.5f, -0.5f, 0.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f, // bottom left
   -0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 0.0f,  0.0f, 1.0f  // top left
 };
+
 
 GLuint indices[] = {
   0, 1, 3,
@@ -36,8 +41,13 @@ int main(){
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+  // glm::vec4 vec(1.0f, 0.0f, 0.0f, 1.0f);
+  // glm::mat4 trans{1.0f};
+  // trans = glm::translate(trans, glm::vec3(1.0f, 1.0f, 0.0f));
+  // vec = trans * vec;
+  // std::cout << vec.x << vec.y << vec.z << std::endl;
 
-  GLFWwindow* window = glfwCreateWindow(win_width, win_height, "triangle", nullptr, nullptr);
+  GLFWwindow* window = glfwCreateWindow(win_width, win_height, "Moving texture", nullptr, nullptr);
   if(!window){
     std::cout << "failed to init window\n";
     glfwTerminate();
@@ -53,17 +63,15 @@ int main(){
   }
 
   glViewport(0, 0, 800, 800); 
-  // Create the shader program
+
   Shader shader_program("vertex.shader", "fragment.shader");
-  
-  // Create an dbind the Vector array object
+
   VAO VAO1;
   VAO1.Bind();
-  
-  // Create VBO and EBO
+
   VBO VBO1{vertices, sizeof(vertices)};
   EBO EBO1{indices, sizeof(indices)};
-  
+
   VAO1.LinkVBO(VBO1, 0, 3, 8, 0);
   VAO1.LinkVBO(VBO1, 1, 3, 8, 3);
   VAO1.LinkVBO(VBO1, 2, 2, 8, 6);
@@ -72,34 +80,34 @@ int main(){
   VBO1.Unbind();
   EBO1.Unbind();
 
-  // Load and create a texture
-  //
-  int width, height, nr_channels;
-  unsigned char* data = stbi_load("../resources/container.jpg", &width, &height,
-                                  &nr_channels, 0);
-  uint32_t texture;
-  glGenTextures(1, &texture);
-  glBindTexture(GL_TEXTURE_2D, texture);
-  
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  
-  if (data) {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
-  } else {
-    std::cout << "failed to load texture\n";
-  }
-  stbi_image_free(data);
+  Texture container{"../resources/container.jpg", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGB, GL_UNSIGNED_BYTE};
 
   while(!glfwWindowShouldClose(window)) {
+    // Handle input and clear buffers
     ProcessInput(window);
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
+
+    // Set up the VAO
     VAO1.Bind();
     shader_program.Use();
+    
+    // glm math and transformations
+    float time = glfwGetTime();
+    glm::mat4 trans = glm::mat4(1.0f);
+    trans = glm::translate(trans, glm::vec3(std::sin(time), std::cos(time), 0.0f));
+    trans = glm::rotate(trans, time, glm::vec3(0.0, 0.0, 1.0));
+    trans = glm::scale(trans, glm::vec3(std::sin(time), std::sin(time), std::sin(time)));
+    
+    // Get transformation uniforms
+    uint32_t transform_loc = glGetUniformLocation(shader_program.GetID(), "transform");
+    glUniformMatrix4fv(transform_loc, 1, GL_FALSE, glm::value_ptr(trans));
+  
+    // Get and bind texture unit
+    container.TexUnit(shader_program, "tex0", 0);
+    container.Bind();
+
+    // Draw call, swap buffers, poll events
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     glfwSwapBuffers(window);
     glfwPollEvents();
@@ -108,6 +116,7 @@ int main(){
   VAO1.Delete();
   VBO1.Delete();
   EBO1.Delete();
+  container.Delete();
   shader_program.Delete();
 
   glfwTerminate();

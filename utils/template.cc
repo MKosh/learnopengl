@@ -4,6 +4,10 @@
 #include <iostream>
 #include <cmath>
 
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 #include "../utils/VBO.h"
 #include "../utils/VAO.h"
 #include "../utils/EBO.h"
@@ -66,8 +70,8 @@ int main(){
   VBO VBO1{vertices, sizeof(vertices)};
   EBO EBO1{indices, sizeof(indices)};
 
-  VAO1.LinkVBO(VBO1, 0, 6, 0);
-  VAO1.LinkVBO(VBO1, 1, 6, 3);
+  VAO1.LinkVBO(VBO1, 0, 3, 6, 0);
+  VAO1.LinkVBO(VBO1, 1, 3, 6, 3);
 
   VAO1.Unbind();
   VBO1.Unbind();
