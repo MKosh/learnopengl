@@ -8,6 +8,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <sstream>
 
 #include "../utils/stb_image.h"
 
@@ -21,16 +22,48 @@ const uint32_t win_width = 800;
 
 float vertices[] = {
   // positions        // colors         // texture coords
-   0.5f,  0.5f, 0.0f,  1.0f, 0.0f, 0.0f,  1.0f, 1.0f, // top right
-   0.5f, -0.5f, 0.0f,  0.0f, 1.0f, 0.0f,  1.0f, 0.0f, // bottom right
-  -0.5f, -0.5f, 0.0f,  0.0f, 0.0f, 1.0f,  0.0f, 0.0f, // bottom left
-  -0.5f,  0.5f, 0.0f,  1.0f, 1.0f, 0.0f,  0.0f, 1.0f  // top left
+ -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+0.5f, -0.5f, -0.5f, 1.0f, 0.0f,
+0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
+0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
+-0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
+-0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+-0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
+0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
+0.5f, 0.5f, 0.5f, 1.0f, 1.0f,
+-0.5f, 0.5f, 0.5f, 0.0f, 1.0f,
+-0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+-0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+-0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
+-0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+-0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+-0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+-0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
+0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+-0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+0.5f, -0.5f, -0.5f, 1.0f, 1.0f,
+0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
+0.5f, -0.5f, 0.5f, 1.0f, 0.0f,
+-0.5f, -0.5f, 0.5f, 0.0f, 0.0f,
+-0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+-0.5f, 0.5f, -0.5f, 0.0f, 1.0f,
+0.5f, 0.5f, -0.5f, 1.0f, 1.0f,
+0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+0.5f, 0.5f, 0.5f, 1.0f, 0.0f,
+-0.5f, 0.5f, 0.5f, 0.0f, 0.0f,
+-0.5f, 0.5f, -0.5f, 0.0f, 1.0f 
 };
 
-GLuint indices[] = {
-  0, 1, 3,
-  1, 2, 3
-};
+// GLuint indices[] = {
+//   0, 1, 3,
+//   1, 2, 3
+// };
 
 auto FramebufferSizeCallback(GLFWwindow* window, int32_t width, int32_t height) -> void;
 auto ProcessInput(GLFWwindow* window) -> void;
@@ -58,6 +91,7 @@ int main(){
   }
 
   glViewport(0, 0, 800, 800); 
+  glEnable(GL_DEPTH_TEST);
   // Create the shader program
   Shader shader_program("vertex.shader", "fragment.shader");
   
@@ -67,15 +101,14 @@ int main(){
   
   // Create VBO and EBO
   VBO VBO1{vertices, sizeof(vertices)};
-  EBO EBO1{indices, sizeof(indices)};
+  // EBO EBO1{indices, sizeof(indices)};
   
-  VAO1.LinkVBO(VBO1, 0, 3, 8, 0);
-  VAO1.LinkVBO(VBO1, 1, 3, 8, 3);
-  VAO1.LinkVBO(VBO1, 2, 2, 8, 6);
+  VAO1.LinkVBO(VBO1, 0, 3, 5, 0);
+  VAO1.LinkVBO(VBO1, 1, 2, 5, 3);
 
   VAO1.Unbind();
   VBO1.Unbind();
-  EBO1.Unbind();
+  // EBO1.Unbind();
 
   // Load and create a texture
   //
@@ -100,19 +133,44 @@ int main(){
   }
   stbi_image_free(data);
 
-  glm::mat4 model = glm::mat4(1.0f);
-  model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-  glm::mat4 view = glm::mat4(1.0f);
-  view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-  glm::mat4 projection = glm::mat4(1.0f);
-  projection = glm::perspective(glm::radians(45.0f), 800.0f/600.0f, 0.1f, 100.0f);
+  double previous_time = 0.0;
+  double current_time = 0.0;
+  double difference;
+  uint32_t counter = 0.0;
+  std::stringstream fps;
+  std::stringstream ms;
 
   while(!glfwWindowShouldClose(window)) {
     ProcessInput(window);
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     VAO1.Bind();
     shader_program.Use();
+    
+    current_time = glfwGetTime();
+    difference = current_time - previous_time;
+    counter++;
+    if (difference >= 1.0/30.0){
+      fps << "fps: " << 1/difference * counter;
+      ms << " ms: " << difference/counter *1000;
+      std::string title = fps.str() + ms.str();
+      glfwSetWindowTitle(window, title.c_str());
+      previous_time = current_time;
+      counter = 0;
+      fps.str("");
+      ms.str("");
+    }
+
+
+    // std::cout << "fps: " << 1000/(current_time - previous_time) << '\n';
+    // previous_time = current_time;
+
+  glm::mat4 model = glm::mat4(1.0f);
+  model = glm::rotate(model, (float)glfwGetTime()/**glm::radians(50.0f)*/, glm::vec3(0.5f, 1.0f, 0.0f));
+  glm::mat4 view = glm::mat4(1.0f);
+  view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+  glm::mat4 projection = glm::mat4(1.0f);
+  projection = glm::perspective(glm::radians(45.0f), 800.0f/600.0f, 0.1f, 100.0f);
 
     int model_loc = glGetUniformLocation(shader_program.GetID(), "model");
     glUniformMatrix4fv(model_loc, 1, GL_FALSE, glm::value_ptr(model));
@@ -121,14 +179,15 @@ int main(){
     int proj_loc = glGetUniformLocation(shader_program.GetID(), "projection");
     glUniformMatrix4fv(proj_loc, 1, GL_FALSE, glm::value_ptr(projection));
 
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    // glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    glDrawArrays(GL_TRIANGLES, 0, 36);
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
 
   VAO1.Delete();
   VBO1.Delete();
-  EBO1.Delete();
+  // EBO1.Delete();
   shader_program.Delete();
 
   glfwTerminate();
