@@ -1,20 +1,29 @@
 #pragma once
 
 #include <glad/glad.h>
+#include <glm/glm.hpp>
 #include <cstdint>
 #include <fstream>
 #include <iostream>
+#include <unordered_map>
 
 
 class Shader {
 private:
   uint32_t m_ID;
-
+  // caching for uniforms
+  std::unordered_map<std::string, int32_t> m_UniformLocationCache;
 public:
   Shader(const char* vertex_file, const char* fragment_file);
 
-  uint32_t GetID() {return m_ID;}
-  void SetID(uint32_t new_program) {m_ID = new_program;}
-  void Use();
-  void Delete();
+  auto GetID() const -> uint32_t {return m_ID;}
+  auto SetID(uint32_t new_program) -> void {m_ID = new_program;}
+  auto Use() const -> void;
+  auto Delete() const -> void;
+
+  auto SetUniform4f(const std::string& name, glm::vec4 values) -> void;
+  auto SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3) -> void;
+
+private:
+  auto GetUniformLocation(const std::string& name) -> int32_t;
 };

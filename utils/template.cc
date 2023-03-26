@@ -13,6 +13,7 @@
 #include "../utils/EBO.h"
 #include "../utils/shader.h"
 #include "../utils/VBOLayout.h"
+#include "../utils/Renderer.h"
 
 const uint32_t win_height = 800;
 const uint32_t win_width = 800;
@@ -65,37 +66,36 @@ int main(){
 
   Shader shader_program("vertex.shader", "fragment.shader");
 
-  VAO VAO1;
-  VAO1.Bind();
+  VAO vao1;
+  vao1.Bind();
 
-  VBO VBO1{vertices, sizeof(vertices)};
-  EBO EBO1{indices, sizeof(indices)};
+  VBO vbo1{vertices, sizeof(vertices)};
+  EBO ebo1{indices, sizeof(indices)};
 
   VBOLayout layout;
   layout.Push(GL_FLOAT, 3);
   layout.Push(GL_FLOAT, 3);
 
-  VAO1.LinkVBO(VBO1, layout);
+  vao1.LinkVBO(vbo1, layout);
 
-  VAO1.Unbind();
-  VBO1.Unbind();
-  EBO1.Unbind();
+  vao1.Unbind();
+  vbo1.Unbind();
+  ebo1.Unbind();
+
+  Renderer renderer;
 
   while(!glfwWindowShouldClose(window)) {
     ProcessInput(window);
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-    VAO1.Bind();
-    shader_program.Use();
-    glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
-    //glDrawArrays(GL_TRIANGLES, 0, 3);
+    renderer.Clear();
+    renderer.Draw(vao1, ebo1, shader_program);
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
 
-  VAO1.Delete();
-  VBO1.Delete();
-  EBO1.Delete();
+  vao1.Delete();
+  vao1.Delete();
+  ebo1.Delete();
   shader_program.Delete();
 
   glfwTerminate();

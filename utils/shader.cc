@@ -57,11 +57,36 @@ Shader::Shader(const char* vertex_file, const char* fragment_file) {
   glDeleteShader(fragment_shader);
 }
 
-void Shader::Use() {
+auto Shader::Use() const -> void
+{
   glUseProgram(m_ID);
 }
 
-void Shader::Delete() {
+auto Shader::Delete() const -> void
+{
   glDeleteProgram(m_ID);
 }
 
+auto Shader::SetUniform4f(const std::string& name, glm::vec4 values) -> void 
+{
+  glUniform4f(GetUniformLocation(name), values.x, values.y, values.z, values.w);
+}
+
+auto Shader::SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3) -> void
+{
+  glUniform4f(GetUniformLocation(name), v0, v1, v2, v3);
+}
+
+auto Shader::GetUniformLocation(const std::string& name) -> int32_t
+{
+  if(m_UniformLocationCache.find(name) != m_UniformLocationCache.end())
+    return m_UniformLocationCache[name];
+
+  uint32_t location = glGetUniformLocation(m_ID, name.c_str());
+  if (location == -1)
+    std::cout << "Warning: uniform " << name << " doesn't exist!\n";
+  
+  m_UniformLocationCache[name] = location; 
+  return location;
+
+}
