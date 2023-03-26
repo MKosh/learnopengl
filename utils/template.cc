@@ -12,6 +12,7 @@
 #include "../utils/VAO.h"
 #include "../utils/EBO.h"
 #include "../utils/shader.h"
+#include "../utils/VBOLayout.h"
 
 const uint32_t win_height = 800;
 const uint32_t win_width = 800;
@@ -70,8 +71,11 @@ int main(){
   VBO VBO1{vertices, sizeof(vertices)};
   EBO EBO1{indices, sizeof(indices)};
 
-  VAO1.LinkVBO(VBO1, 0, 3, 6, 0);
-  VAO1.LinkVBO(VBO1, 1, 3, 6, 3);
+  VBOLayout layout;
+  layout.Push(GL_FLOAT, 3);
+  layout.Push(GL_FLOAT, 3);
+
+  VAO1.LinkVBO(VBO1, layout);
 
   VAO1.Unbind();
   VBO1.Unbind();

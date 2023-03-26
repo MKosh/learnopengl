@@ -2,24 +2,29 @@
 #include <cstdint>
 #include <iostream>
 
-EBO::EBO(GLuint* indices, GLsizeiptr size) {
+EBO::EBO(const uint32_t* indices, uint32_t size) : m_count{size}
+{
   glGenBuffers(1, &m_ID);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ID);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, indices, GL_STATIC_DRAW);
-  //std::cout << "size = " << size << '\n';
-  //for (GLsizeiptr i = 0; i < size/4; i++) {
-  //  std::cout << indices[i] << '\n';
-  //}
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, size*sizeof(uint32_t), indices, GL_STATIC_DRAW);
 }
 
-void EBO::Bind() {
+// EBO::~EBO()
+// {
+//   glDeleteBuffers(1, &m_ID);
+// }
+
+auto EBO::Bind() const -> void
+{
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ID);
 }
 
-void EBO::Unbind() {
+auto EBO::Unbind() const -> void
+{
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void EBO::Delete() {
+auto EBO::Delete() const -> void
+{
   glDeleteBuffers(1, &m_ID);
 }
