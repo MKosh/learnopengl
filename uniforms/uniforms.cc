@@ -8,6 +8,7 @@
 #include "../utils/VAO.h"
 #include "../utils/EBO.h"
 #include "../utils/shader.h"
+#include "../utils/VBOLayout.h"
 
 const uint32_t win_height = 800;
 const uint32_t win_width = 800;
@@ -53,19 +54,27 @@ int main(){
   float green_value{};
   Shader shader_program("vertex.shader", "fragment.shader");
 
-  int vertex_color_location = glGetUniformLocation(shader_program.GetID(), "u_color");
-  if (vertex_color_location == -1) {
-    std::cout << "Error getting uniform location\n";
-    std::exit(1);
-  }
+  // int vertex_color_location = glGetUniformLocation(shader_program.GetID(), "u_color");
+  // if (vertex_color_location == -1) {
+  //   std::cout << "Error getting uniform location\n";
+  //   std::exit(1);
+  // }
+  
+  shader_program.SetUniform4f("u_color", 0.8f, 0.8f, 0.8f, 1.0f);
+
   VAO VAO1;
   VAO1.Bind();
 
   VBO VBO1{vertices, sizeof(vertices)};
   EBO EBO1{indices, sizeof(indices)};
 
-  VAO1.LinkVBO(VBO1, 0, 6, 0);
-  VAO1.LinkVBO(VBO1, 1, 6, 3);
+  VBOLayout layout;
+  layout.Push(GL_FLOAT, 3);
+  layout.Push(GL_FLOAT, 3);
+
+  // VAO1.LinkVBO(VBO1, 0, 6, 0);
+  // VAO1.LinkVBO(VBO1, 1, 6, 3);
+  VAO1.LinkVBO(VBO1, layout);
 
   VAO1.Unbind();
   VBO1.Unbind();
@@ -79,7 +88,8 @@ int main(){
     shader_program.Use();
     time_value = glfwGetTime();
     green_value = (sin(time_value) / 2.0f) + 0.5f;
-    glUniform4f(vertex_color_location, 0.0f, green_value, 0.0f, 1.0f);
+    // glUniform4f(vertex_color_location, 0.0f, green_value, 0.0f, 1.0f);
+    shader_program.SetUniform4f("u_color", 0.0f, green_value, 0.0f, 1.0f);
     glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
     glfwSwapBuffers(window);
     glfwPollEvents();
