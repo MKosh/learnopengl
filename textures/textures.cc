@@ -10,6 +10,9 @@
 #include "../utils/VAO.h"
 #include "../utils/EBO.h"
 #include "../utils/shader.h"
+#include "../utils/VBOLayout.h"
+#include "../utils/Renderer.h"
+#include "../utils/texture.h"
 
 const uint32_t win_height = 800;
 const uint32_t win_width = 800;
@@ -53,54 +56,47 @@ int main(){
   }
 
   glViewport(0, 0, 800, 800); 
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+  glEnable(GL_BLEND);
+  // glEnable(GL_DEPTH_TEST);
   // Create the shader program
   Shader shader_program("vertex.shader", "fragment.shader");
   
-  // Create an dbind the Vector array object
+  // Create and bind the Vector array object
   VAO VAO1;
   VAO1.Bind();
   
   // Create VBO and EBO
   VBO VBO1{vertices, sizeof(vertices)};
   EBO EBO1{indices, sizeof(indices)};
-  
-  VAO1.LinkVBO(VBO1, 0, 3, 8, 0);
-  VAO1.LinkVBO(VBO1, 1, 3, 8, 3);
-  VAO1.LinkVBO(VBO1, 2, 2, 8, 6);
+  VBOLayout layout; 
+
+  layout.Push(GL_FLOAT, 3);
+  layout.Push(GL_FLOAT, 3);
+  layout.Push(GL_FLOAT, 2);
+  // VAO1.LinkVBO(VBO1, 0, 3, 8, 0);
+  // VAO1.LinkVBO(VBO1, 1, 3, 8, 3);
+  // VAO1.LinkVBO(VBO1, 2, 2, 8, 6);
+  VAO1.LinkVBO(VBO1, layout);
 
   VAO1.Unbind();
   VBO1.Unbind();
   EBO1.Unbind();
 
-  // Load and create a texture
-  //
-  int width, height, nr_channels;
-  unsigned char* data = stbi_load("../resources/container.jpg", &width, &height,
-                                  &nr_channels, 0);
-  uint32_t texture;
-  glGenTextures(1, &texture);
-  glBindTexture(GL_TEXTURE_2D, texture);
-  
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  
-  if (data) {
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
-  } else {
-    std::cout << "failed to load texture\n";
-  }
-  stbi_image_free(data);
+  Texture texture{"../resources/container.jpg", GL_TEXTURE_2D};
+  texture.Bind();
+  shader_program.SetUniform1i("u_texture", 0);
+  Renderer renderer;
 
   while(!glfwWindowShouldClose(window)) {
     ProcessInput(window);
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-    VAO1.Bind();
-    shader_program.Use();
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    
+    // container.TexUnit(shader_program, "tex0", 0);
+    // container.Bind();
+glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    // renderer.Clear();
+    renderer.Draw(VAO1, EBO1, shader_program);
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
@@ -113,7 +109,7 @@ int main(){
   glfwTerminate();
 }
 
-auto FramebufferSizeCallback(GLFWwindow* window, int32_t width, int32_t height) -> void
+auto FramebufferSizeCallback([[maybe_unused]] GLFWwindow* window, int32_t width, int32_t height) -> void
 {
   glViewport(0, 0, width, height);
 }

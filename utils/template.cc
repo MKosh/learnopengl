@@ -101,7 +101,7 @@ int main(){
   glfwTerminate();
 }
 
-auto FramebufferSizeCallback(GLFWwindow* window, int32_t width, int32_t height) -> void
+auto FramebufferSizeCallback([[maybe_unused]] GLFWwindow* window, int32_t width, int32_t height) -> void
 {
   glViewport(0, 0, width, height);
 }

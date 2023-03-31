@@ -10,7 +10,7 @@ private:
   uint32_t m_ID;
   uint32_t m_count;
 public:
-  EBO(const uint32_t* indices, uint32_t size);
+  EBO(const uint32_t* indices, uint32_t count);
   // ~EBO();
 
   auto Bind() const -> void;

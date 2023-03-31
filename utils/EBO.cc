@@ -2,11 +2,11 @@
 #include <cstdint>
 #include <iostream>
 
-EBO::EBO(const uint32_t* indices, uint32_t size) : m_count{size}
+EBO::EBO(const uint32_t* indices, uint32_t count) : m_count{count}
 {
   glGenBuffers(1, &m_ID);
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ID);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, size*sizeof(uint32_t), indices, GL_STATIC_DRAW);
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, count*sizeof(uint32_t), indices, GL_STATIC_DRAW);
 }
 
 // EBO::~EBO()
