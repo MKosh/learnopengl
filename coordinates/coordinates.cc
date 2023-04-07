@@ -103,7 +103,7 @@ int main(){
   }
 
   glViewport(0, 0, 800, 800); 
-    glEnable(GL_DEPTH_TEST);
+  // glEnable(GL_DEPTH_TEST);
   // glDepthFunc(GL_LESS);
   // Create the shader program
   Shader shader_program("vertex.shader", "fragment.shader");

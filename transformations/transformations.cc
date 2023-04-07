@@ -14,6 +14,8 @@
 #include "../utils/EBO.h"
 #include "../utils/shader.h"
 #include "../utils/texture.h"
+#include "../utils/Renderer.h"
+#include "../utils/VBOLayout.h"
 
 const uint32_t win_height = 800;
 const uint32_t win_width = 800;
@@ -72,15 +74,22 @@ int main(){
   VBO VBO1{vertices, sizeof(vertices)};
   EBO EBO1{indices, 6};
 
-  VAO1.LinkVBO(VBO1, 0, 3, 8, 0);
-  VAO1.LinkVBO(VBO1, 1, 3, 8, 3);
-  VAO1.LinkVBO(VBO1, 2, 2, 8, 6);
+  VBOLayout layout;
+  layout.Push(GL_FLOAT, 3);
+  layout.Push(GL_FLOAT, 3);
+  layout.Push(GL_FLOAT, 2);
+
+  VAO1.LinkVBO(VBO1, layout);
+  // VAO1.LinkVBO(VBO1, 1, 3, 8, 3);
+  // VAO1.LinkVBO(VBO1, 2, 2, 8, 6);
 
   VAO1.Unbind();
   VBO1.Unbind();
   EBO1.Unbind();
 
-  Texture container{"../resources/container.jpg", GL_TEXTURE_2D, GL_TEXTURE0, GL_RGB, GL_UNSIGNED_BYTE};
+  Texture container{"../resources/container.jpg", GL_TEXTURE_2D};
+  container.Bind();
+
 
   while(!glfwWindowShouldClose(window)) {
     // Handle input and clear buffers
@@ -95,9 +104,9 @@ int main(){
     // glm math and transformations
     float time = glfwGetTime();
     glm::mat4 trans = glm::mat4(1.0f);
-    trans = glm::translate(trans, glm::vec3(std::sin(time), std::cos(time), 0.0f));
-    trans = glm::rotate(trans, time, glm::vec3(0.0, 0.0, 1.0));
-    trans = glm::scale(trans, glm::vec3(std::sin(time), std::sin(time), std::sin(time)));
+    trans = glm::translate(trans, glm::vec3(std::sin(time), 0.0f, 0.0f));
+    // trans = glm::rotate(trans, time, glm::vec3(0.0, 0.0, 1.0));
+    // trans = glm::scale(trans, glm::vec3(std::sin(time), std::sin(time), std::sin(time)));
     
     // Get transformation uniforms
     uint32_t transform_loc = glGetUniformLocation(shader_program.GetID(), "transform");
