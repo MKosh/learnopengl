@@ -1,6 +1,6 @@
 mkdir ${1}
-cp utils/template.cc ${1}
-mv ${1}/template.cc ${1}/${1}.cc
+cp utils/template.temp ${1}
+mv ${1}/template.temp ${1}/${1}.cc
 cp utils/*.shader ${1}
 cp utils/Makefile ${1}
 
