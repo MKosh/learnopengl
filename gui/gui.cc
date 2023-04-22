@@ -3,14 +3,16 @@
 #include <GLFW/glfw3.h>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/ext/matrix_transform.hpp>
+#include <glm/fwd.hpp>
 #include <glm/geometric.hpp>
 #include <iostream>
 #include <cmath>
+#include <sstream>
+
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <sstream>
 
 #include "../utils/imgui.h"
 #include "../utils/imgui_impl_glfw.h"
@@ -25,9 +27,10 @@
 #include "../utils/VBOLayout.h"
 #include "../utils/texture.h"
 #include "../utils/Renderer.h"
+#include "../utils/camera.h"
 
-const uint32_t win_height = 800;
-const uint32_t win_width = 800;
+const uint32_t win_width = 1280;
+const uint32_t win_height = 720;
 
 float vertices[] = {
   // positions        // texture coords
@@ -88,22 +91,20 @@ glm::vec3 cubePositions[] = {
 };
 
 bool first_mouse = true;
-glm::vec3 camera_pos = glm::vec3(0.0f, 0.0f, 3.0f);
-glm::vec3 camera_up = glm::vec3(0.0f, 1.0f, 0.0f);
+bool interactive = true;
 float dt = 0.0f;
 float last_frame = 0.0f;
-float yaw = -90.0f;
-float pitch = 0.0f;
-float last_x = win_width/2.0, last_y = win_height/2.0;
-
-glm::vec3 direction{cos(glm::radians(yaw)) * cos(glm::radians(pitch)), 
-                    sin(glm::radians(pitch)), sin(glm::radians(yaw)) * cos(glm::radians(pitch))};
-
-glm::vec3 camera_front = glm::normalize(direction);
+float last_x = win_width/2.0;
+float last_y = win_height/2.0;
+Camera camera{glm::vec3{0.0f, 0.0f, 3.0f}};
+float yaw = camera.GetYaw();
+float pitch = camera.GetPitch();
 
 auto FramebufferSizeCallback(GLFWwindow* window, int32_t width, int32_t height) -> void;
 auto ProcessInput(GLFWwindow* window) -> void;
 auto mouse_callback(GLFWwindow* window, double xpos, double ypos) -> void;
+auto scroll_callback(GLFWwindow* window, double xpos, double ypos) -> void;
+auto interactive_callback(GLFWwindow* window, int key, int scancode, int action, int mods) -> void;
 
 int main(){
   glfwInit();
@@ -122,19 +123,17 @@ int main(){
   glfwMakeContextCurrent(window);
   glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
   glfwSetCursorPosCallback(window, mouse_callback);
-
+  glfwSetScrollCallback(window, scroll_callback);
+  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+  glfwSetKeyCallback(window, interactive_callback);
+ 
   if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)){
     std::cout << "failed to init GLAD\n";
     return -1;
   }
 
-  glViewport(0, 0, 800, 800); 
-  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+  glViewport(0, 0, win_width, win_height); 
 
-  // Enable depth test: NOTE for whatever reason this doesn't seem to work on my
-  // laptop under wsl. Seems to work okay on my desktop though. I'm guessing it's
-  // a graphics driver thing or something. It just produces a blank screen.
-  // Updated graphics drivers and it seems to work fine on my laptop now.
   glEnable(GL_DEPTH_TEST);
   // Create the shader program
   Shader shader_program("vertex.shader", "fragment.shader");
@@ -155,6 +154,8 @@ int main(){
   Texture texture{"../resources/container.jpg", GL_TEXTURE_2D};
   texture.Bind();
   shader_program.SetUniform1i("u_texture", 0);
+  texture.Unbind();
+
   
   Renderer renderer;
 
@@ -166,28 +167,28 @@ int main(){
   float pitch{};
 
   while(!glfwWindowShouldClose(window)) {
-    float current_frame = glfwGetTime();
+    float current_frame = (float)glfwGetTime();
     dt = current_frame - last_frame;
     last_frame = current_frame;
 
     ProcessInput(window);
     
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-
-    shader_program.Use();
-    VAO1.Bind();
     renderer.Clear();     
     
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
-
-    glm::mat4 view;
-    view = glm::lookAt(camera_pos, camera_pos+camera_front, camera_up);
+    
+    shader_program.Use();
+    texture.Bind();
+    VAO1.Bind();
+    
+    glm::mat4 view = camera.GetViewMatrix();
     shader_program.SetMat4f("view", view);
 
     glm::mat4 projection = glm::mat4(1.0f);
-    projection = glm::perspective(glm::radians(45.0f), 800.0f/800.0f, 0.001f, 1000.0f);
+    projection = glm::perspective(glm::radians(camera.GetZoom()), static_cast<float>(win_width)/(float)win_height, 0.1f, 1000.0f);
     shader_program.SetMat4f("projection", projection);
 
     for (uint32_t i = 0; i < 10; ++i) {
@@ -203,7 +204,6 @@ int main(){
       renderer.Draw(VAO1, 36, shader_program);
     }
 
-
     ImGui::Begin("Demo window");
     ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
     ImGui::SliderFloat("speed", &speed, 0.0f, 100.0f);
@@ -211,11 +211,8 @@ int main(){
     ImGui::SliderFloat("yaw", &yaw, -179.0f, 179.0f);
     ImGui::End();
 
-
-    // direction = {cos(glm::radians(yaw)) * cos(glm::radians(pitch)), 
-    //                 sin(glm::radians(pitch)), sin(glm::radians(yaw)) * cos(glm::radians(pitch))};
-
-    // camera_front = glm::normalize(direction);
+    pitch = camera.GetPitch();
+    yaw = camera.GetYaw();
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -226,6 +223,7 @@ int main(){
   VAO1.Delete();
   VBO1.Delete();
   shader_program.Delete();
+
 
   ImGui_ImplOpenGL3_Shutdown();
   ImGui_ImplGlfw_Shutdown();
@@ -245,13 +243,13 @@ auto ProcessInput(GLFWwindow* window) -> void
   if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
     glfwSetWindowShouldClose(window, true);
   if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-    camera_pos += camera_speed * camera_front;
+    camera.ProcessKeyboard(CameraMovement::FORWARD, dt);
   if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-    camera_pos -= camera_speed * camera_front;
+    camera.ProcessKeyboard(CameraMovement::BACKWARD, dt);
   if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-    camera_pos -= glm::normalize(glm::cross(camera_front, camera_up)) * camera_speed;
+    camera.ProcessKeyboard(CameraMovement::LEFT, dt);
   if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-    camera_pos += glm::normalize(glm::cross(camera_front, camera_up)) * camera_speed;
+    camera.ProcessKeyboard(CameraMovement::RIGHT, dt);
 }
 
 auto mouse_callback(GLFWwindow* window, double xpos_in, double ypos_in) -> void
@@ -271,23 +269,21 @@ auto mouse_callback(GLFWwindow* window, double xpos_in, double ypos_in) -> void
   last_x = xpos;
   last_y = ypos;
 
-  const float sensitivity = 0.001f;
-  x_offset *= sensitivity;
-  y_offset *= sensitivity;
-  
-  yaw += x_offset;
-  pitch += y_offset;
+  camera.ProcessMouseMovement(x_offset, y_offset);
+}
 
-  if (pitch > 89.0f) pitch = 89.0f;
-  if (pitch < -89.0f) pitch = -89.0f;
+auto scroll_callback(GLFWwindow* window, double xpos, double ypos) -> void {
+  camera.ProcessMouseScroll(static_cast<float>(ypos));
+}
 
-  // glm::vec3 direction = {cos(glm::radians(yaw)) * cos(glm::radians(pitch)), 
-  //                   sin(glm::radians(pitch)), sin(glm::radians(yaw)) * cos(glm::radians(pitch))};
-  // std::cout << "pitch = " << pitch << '\n';
-  glm::vec3 direction;
-  direction.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-  direction.y = sin(glm::radians(pitch));
-  direction.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
-  
-  camera_front = glm::normalize(direction);
+auto interactive_callback(GLFWwindow* window, int key, int scancode, int action, int mods) -> void {
+  if (key == GLFW_KEY_I && action == GLFW_PRESS) {
+    if (interactive == true) {
+      interactive = false;
+      glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    } else {
+      interactive = true;
+      glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    }
+  }
 }

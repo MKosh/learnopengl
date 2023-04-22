@@ -1,0 +1,4 @@
+*.o
+*.d
+utils/build/
+utils/log/
