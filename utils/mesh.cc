@@ -43,6 +43,8 @@ auto Mesh::SetupMesh() -> void {
 auto Mesh::Draw(Shader& shader) -> void {
   u32 diffuseNr = 1;
   u32 specularNr = 1;
+  u32 normalNr = 1;
+  u32 heightNr = 1;
   for (u32 i = 0; i < m_textures.size(); ++i) {
     glActiveTexture(GL_TEXTURE0 + i);
     std::string number;
@@ -51,15 +53,19 @@ auto Mesh::Draw(Shader& shader) -> void {
       number = std::to_string(diffuseNr++);
     else if (name == "texture_specular")
       number = std::to_string(specularNr++);
+    else if (name == "texture_normal")
+      number = std::to_string(normalNr++);
+    else if (name == "texture_height")
+      number = std::to_string(heightNr++);
 
-    shader.SetFloat(("material." + name + number).c_str(), i);
+    shader.SetUniform1i((name + number).c_str(), i);
     glBindTexture(GL_TEXTURE_2D, m_textures[i].id);
   }
   
-  glActiveTexture(GL_TEXTURE0);
-
   // Draw mesh
   glBindVertexArray(m_vao);
-  glDrawElements(GL_TRIANGLES, m_indicies.size(), GL_UNSIGNED_INT, 0);
+  glDrawElements(GL_TRIANGLES, static_cast<u32>(m_indicies.size()), GL_UNSIGNED_INT, 0);
   glBindVertexArray(0);
+  
+  glActiveTexture(GL_TEXTURE0);
 }
