@@ -150,17 +150,17 @@ int main(){
     shader_program.Use();
 
     glm::mat4 view = camera.GetViewMatrix();
-    shader_program.SetMat4f("view", view);
+    shader_program.SetMat4f("u_view", view);
 
     glm::mat4 projection = glm::mat4(1.0f);
     projection = glm::perspective(glm::radians(camera.GetZoom()), (float)win_width/win_height, 0.1f, 1000.0f);
-    shader_program.SetMat4f("projection", projection);
+    shader_program.SetMat4f("u_projection", projection);
 
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f));
     model = glm::scale(model, glm::vec3(1.0f, 1.0f, 1.0f));
     
-    shader_program.SetMat4f("model", model);
+    shader_program.SetMat4f("u_model", model);
     backpack.Draw(shader_program);
 
     

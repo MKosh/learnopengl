@@ -14,12 +14,12 @@ auto TextureFromFile(const char* path, const std::string& directory) -> u32;
 Model::Model(const std::string& path) { Model::LoadModel(path); }
 
 auto Model::Draw(Shader shader) -> void {
-  // for (u32 i = 0; i < m_meshes.size(); ++i) {
-  //   m_meshes[i].Draw(shader);
-  // }
-  for (auto &mesh : m_meshes) {
-    mesh.Draw(shader);
+  for (u32 i = 0; i < m_meshes.size(); ++i) {
+    m_meshes[i].Draw(shader);
   }
+  // for (auto &mesh : m_meshes) {
+  //   mesh.Draw(shader);
+  // }
 }
 
 auto Model::LoadModel(const std::string& path) -> void {
@@ -65,7 +65,8 @@ auto Model::ProcessMesh(aiMesh *mesh, const aiScene *scene) -> Mesh {
       vertex.normal = vector;
     }
     
-    if (mesh->mTextureCoords[0]) {
+    // if (mesh->mTextureCoords[0]) {
+    if (mesh->HasTextureCoords(0)) {
       glm::vec2 vec;
       vec.x = mesh->mTextureCoords[0][i].x;
       vec.y = mesh->mTextureCoords[0][i].y;
