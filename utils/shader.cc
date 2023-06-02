@@ -40,11 +40,13 @@ Shader::Shader(const char* vertex_file, const char* fragment_file) {
 
   glGetShaderiv(vertex_shader, GL_COMPILE_STATUS, &success);
   if (!success) {
-    std::cout << "ERROR compiling vertex shader!\n";
-  }
+    std::cout << "ERROR compiling vertex shader!\n"
+              << "- Shader: " << vertex_file << "\n\n";
+}
   glGetShaderiv(fragment_shader, GL_COMPILE_STATUS, &success);
   if (!success) {
-    std::cout << "ERROR compiling fragment shader!\n";
+    std::cout << "ERROR compiling fragment shader!\n"
+              << "- Shader: " << fragment_file << "\n\n";
   }
 
   m_ID = glCreateProgram();
@@ -65,6 +67,9 @@ auto Shader::Delete() const -> void {
   glDeleteProgram(m_ID);
 }
 
+auto Shader::SetVec3f(const std::string& name, float v0, float v1, float v2) -> void {
+  glUniform3f(Shader::GetUniformLocation(name), v0, v1, v2);
+}
 auto Shader::SetUniform1i(const std::string &name, int value) -> void {
   glUniform1i(GetUniformLocation(name), value);
 }
@@ -90,8 +95,10 @@ auto Shader::GetUniformLocation(const std::string& name) -> int32_t {
     return m_UniformLocationCache[name];
 
   int32_t location = glGetUniformLocation(m_ID, name.c_str());
-  if (location == -1)
+  if (location == -1) {
     std::cout << "Warning: uniform " << name << " doesn't exist!\n";
+    std::cout << "\tUniform: " << name << " with shader ID: " << m_ID << "\n\n";
+  }
   
   m_UniformLocationCache[name] = location; 
   return location;

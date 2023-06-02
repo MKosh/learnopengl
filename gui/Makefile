@@ -16,7 +16,7 @@ INC_FLAGS := $(addprefix -I,$(RNDR_DIR))
 CPPFLAGS := $(INC_FLAGS) -MMD -MP
 
 $(SRC_DIR)/$(TARGET_PROG): $(RNDR_OBJS) $(SRC_DIR)/gui.cc
-	$(CXX) $(RNDR_OBJS) $(SRC_DIR)/gui.cc -o $@ $(LDFLAGS) -lglfw3
+	$(CXX) $(RNDR_OBJS) $(SRC_DIR)/gui.cc -o $@ $(LDFLAGS) -lassimp -lglfw3
 
 $(RNDR_BLD)/%.c.o: $(RNDR_DIR)/%.c
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@

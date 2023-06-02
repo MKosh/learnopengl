@@ -23,6 +23,7 @@ public:
 
   auto SetUniform4f(const std::string& name, glm::vec4 values) -> void;
   auto SetUniform4f(const std::string& name, float v0, float v1, float v2, float v3) -> void;
+  auto SetVec3f(const std::string& name, float v0, float v1, float v2) -> void;
   auto SetMat4f(const std::string& name, const glm::mat4& mat) -> void;
   auto SetFloat(const std::string& name, float value) -> void;
   auto SetUniform1i(const std::string& name, int value) -> void;

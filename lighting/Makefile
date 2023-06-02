@@ -3,7 +3,7 @@ CXXFLAGS := -std=c++20 -Wall -Wextra -Wpedantic
 ROOT_DIR := ..
 SRC_DIR = .
 RNDR_DIR := $(ROOT_DIR)/utils
-TARGET_PROG := template
+TARGET_PROG := lighting
 RNDR_BLD := $(RNDR_DIR)/build
 
 RNDR_SRC := $(shell find $(RNDR_DIR) -name '*.cc' -or -name '*.c' -or -name '*.cpp')
@@ -15,8 +15,8 @@ INC_FLAGS := $(addprefix -I,$(RNDR_DIR))
 
 CPPFLAGS := $(INC_FLAGS) -MMD -MP
 
-$(SRC_DIR)/$(TARGET_PROG): $(RNDR_OBJS) $(SRC_DIR)/template.cc
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -I$(ROOT_DIR)/utils $(RNDR_OBJS) $(SRC_DIR)/template.cc -o $@ $(LDFLAGS) -lassimp -lglfw
+$(SRC_DIR)/$(TARGET_PROG): $(RNDR_OBJS) $(SRC_DIR)/lighting.cc
+	$(CXX) -I$(ROOT_DIR)/utils $(RNDR_OBJS) $(SRC_DIR)/lighting.cc -o $@ $(LDFLAGS) -lassimp -lglfw
 
 $(RNDR_BLD)/%.c.o: $(RNDR_DIR)/%.c
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
@@ -32,6 +32,6 @@ clean:
 	rm -r $(RNDR_BLD)
 
 run: $(SRC_DIR)/$(TARGET_PROG)
-	./template
+	./lighting
 
 -include $(DEPS)
