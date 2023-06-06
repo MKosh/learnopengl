@@ -80,53 +80,12 @@ float vertices[] = {
    0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
   -0.5f,  0.5f,  0.5f,  0.0f,  1.0f,  0.0f,
   -0.5f,  0.5f, -0.5f,  0.0f,  1.0f,  0.0f
- // -0.5f, -0.5f, -0.5f, 
- //  0.5f, -0.5f, -0.5f, 
- //  0.5f,  0.5f, -0.5f, 
- //  0.5f,  0.5f, -0.5f, 
- // -0.5f,  0.5f, -0.5f, 
- // -0.5f, -0.5f, -0.5f, 
-
- // -0.5f, -0.5f,  0.5f, 
- //  0.5f, -0.5f,  0.5f, 
- //  0.5f,  0.5f,  0.5f, 
- //  0.5f,  0.5f,  0.5f, 
- // -0.5f,  0.5f,  0.5f, 
- // -0.5f, -0.5f,  0.5f, 
-
- // -0.5f,  0.5f,  0.5f, 
- // -0.5f,  0.5f, -0.5f, 
- // -0.5f, -0.5f, -0.5f, 
- // -0.5f, -0.5f, -0.5f, 
- // -0.5f, -0.5f,  0.5f, 
- // -0.5f,  0.5f,  0.5f, 
-
- //  0.5f,  0.5f,  0.5f, 
- //  0.5f,  0.5f, -0.5f, 
- //  0.5f, -0.5f, -0.5f, 
- //  0.5f, -0.5f, -0.5f, 
- //  0.5f, -0.5f,  0.5f, 
- //  0.5f,  0.5f,  0.5f, 
-
- // -0.5f, -0.5f, -0.5f, 
- //  0.5f, -0.5f, -0.5f, 
- //  0.5f, -0.5f,  0.5f, 
- //  0.5f, -0.5f,  0.5f, 
- // -0.5f, -0.5f,  0.5f, 
- // -0.5f, -0.5f, -0.5f, 
-
- // -0.5f,  0.5f, -0.5f, 
- //  0.5f,  0.5f, -0.5f, 
- //  0.5f,  0.5f,  0.5f, 
- //  0.5f,  0.5f,  0.5f, 
- // -0.5f,  0.5f,  0.5f, 
- // -0.5f,  0.5f, -0.5f 
 };
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Config stuff - initial settings
-glm::vec3 cube(-1.0f,  -1.0f,  -1.5f); 
-glm::vec3 light_pos( 1.2f,  0.5f, -2.0f); 
+glm::vec3 cube(-0.5f,  -1.0f,  -1.5f); 
+glm::vec3 light_pos( 0.0f,  0.1f, -5.0f); 
 
 bool first_mouse = true;
 bool interactive = true;
@@ -147,38 +106,8 @@ auto scroll_callback(GLFWwindow* window, double xpos, double ypos) -> void;
 auto interactive_callback(GLFWwindow* window, int key, int scancode, int action, int mods) -> void;
 
 int main(){
- //  glfwInit();
- //  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
- //  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
- //  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-
- //  GLFWwindow* window = glfwCreateWindow(win_width, win_height, "triangle", nullptr, nullptr);
- //  if(!window){
- //    std::cout << "failed to init window\n";
- //    glfwTerminate();
- //    return -1;
- //  }
- //  
- //  glfwMakeContextCurrent(window);
- //  glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
- //  glfwSetCursorPosCallback(window, mouse_callback);
- //  glfwSetScrollCallback(window, scroll_callback);
- //  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
- //  glfwSetKeyCallback(window, interactive_callback);
- // 
- //  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)){
- //    std::cout << "failed to init GLAD\n";
- //    return -1;
- //  }
-
- //  glViewport(0, 0, win_width, win_height); 
- //  glEnable(GL_DEPTH_TEST);
-  //
-
   Window win{win_width, win_height, "lighting"};
   auto window = win.GetWindow();
-
 
   /////////////////////////////////////////////////////////////////////////////
   // Create the shader program
@@ -223,8 +152,7 @@ int main(){
 
     ProcessInput(window);
     
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    // glClearColor(1.0f, 0.5f, 0.31f, 1.0f);
+    glClearColor(0.1f, 0.2f, 0.2f, 1.0f);
     renderer.Clear();     
     
     ImGui_ImplOpenGL3_NewFrame();
@@ -239,19 +167,18 @@ int main(){
     glm::mat4 view = camera.GetViewMatrix();
     glm::mat4 projection = glm::mat4(1.0f);
     projection = glm::perspective(glm::radians(camera.GetZoom()), static_cast<float>(win_width)/(float)win_height, 0.1f, 1000.0f);
-    // float random_x = std::rand();// /10.0;
-    // float random_y = std::rand();// /10.0;
-    // float random_z = std::rand();
-    // glm::vec3 random_walk{std::rand()/10000.0, std::rand()/10000.0, std::rand()/10000.0};
     
-    // std::cout << "x = " << std::rand()/(RAND_MAX) << "\ny = " << std::rand() << '\n';
     model = glm::translate(model, cube);
     
     color_cube_s.SetMat4f("view", view);
     color_cube_s.SetMat4f("projection", projection);
     color_cube_s.SetMat4f("model", model);
+    color_cube_s.SetVec3f("view_pos", camera.GetPosition());
 
-    color_cube_s.SetVec3f("light_pos", light_pos.x, light_pos.y, light_pos.z);
+    float radius = 5.0f;
+    glm::vec3 moved_light{radius*std::cos(speed*0.1*current_frame)+light_pos.x, light_pos.y, radius*std::sin(speed*0.1*current_frame)+light_pos.z};
+    
+    color_cube_s.SetVec3f("light_pos", moved_light);
 
     renderer.Draw(cube_vao, sizeof(vertices), color_cube_s);
 
@@ -260,7 +187,7 @@ int main(){
     light_cube_s.SetMat4f("view", view);
 
     model = glm::mat4(1.0f);
-    model = glm::translate(model, light_pos);
+    model = glm::translate(model, moved_light);
     model = glm::scale(model, glm::vec3(0.2f));
 
     light_cube_s.SetMat4f("model", model);
