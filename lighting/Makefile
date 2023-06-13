@@ -1,5 +1,5 @@
 CXX := g++
-CXXFLAGS := -std=c++20 -Wall -Wextra -Wpedantic
+CXXFLAGS := -std=c++20 -g -Wall -Wextra -Wpedantic
 ROOT_DIR := ..
 SRC_DIR = .
 RNDR_DIR := $(ROOT_DIR)/utils
@@ -16,7 +16,7 @@ INC_FLAGS := $(addprefix -I,$(RNDR_DIR))
 CPPFLAGS := $(INC_FLAGS) -MMD -MP
 
 $(SRC_DIR)/$(TARGET_PROG): $(RNDR_OBJS) $(SRC_DIR)/lighting.cc
-	$(CXX) -I$(ROOT_DIR)/utils $(RNDR_OBJS) $(SRC_DIR)/lighting.cc -o $@ $(LDFLAGS) -lassimp -lglfw
+	$(CXX) $(CXXFLAGS) -I$(ROOT_DIR)/utils $(RNDR_OBJS) $(SRC_DIR)/lighting.cc -o $@ $(LDFLAGS) -lassimp -lglfw
 
 $(RNDR_BLD)/%.c.o: $(RNDR_DIR)/%.c
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@

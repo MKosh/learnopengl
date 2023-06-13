@@ -84,8 +84,8 @@ float vertices[] = {
 
 ///////////////////////////////////////////////////////////////////////////////
 /// Config stuff - initial settings
-glm::vec3 cube(-0.5f,  -1.0f,  -1.5f); 
-glm::vec3 light_pos( 0.0f,  0.1f, -5.0f); 
+glm::vec3 cube(-2.0f,  -1.0f,  -2.0f); 
+glm::vec3 light_pos(-3.0f,  0.1f, -1.0f); 
 
 bool first_mouse = true;
 bool interactive = true;
@@ -108,6 +108,31 @@ auto interactive_callback(GLFWwindow* window, int key, int scancode, int action,
 int main(){
   Window win{win_width, win_height, "lighting"};
   auto window = win.GetWindow();
+   
+ //  glfwInit();
+ //  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+ //  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+ //  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
+ //  GLFWwindow* window = glfwCreateWindow(win_width, win_height, "lighting", nullptr, nullptr);
+ //  if (!window) {
+ //    std::cout << "ERROR: failed to initialize GLFW window\n";
+ //    glfwTerminate();
+ //  }
+
+ //  glfwMakeContextCurrent(window);
+ //  glfwSetFramebufferSizeCallback(window, FramebufferSizeCallback);
+ //  glfwSetCursorPosCallback(window, mouse_callback);
+ //  glfwSetScrollCallback(window, scroll_callback);
+ //  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+ //  glfwSetKeyCallback(window, interactive_callback);
+ // 
+ //  if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)){
+ //    std::cout << "ERROR: failed to initialize GLAD\n";
+ //  }
+
+ //  glViewport(0, 0, win_width, win_height); 
+ //  glEnable(GL_DEPTH_TEST);
 
   /////////////////////////////////////////////////////////////////////////////
   // Create the shader program
@@ -193,6 +218,7 @@ int main(){
     projection = glm::perspective(glm::radians(camera.GetZoom()), static_cast<float>(win_width)/(float)win_height, 0.1f, 1000.0f);
     
     model = glm::translate(model, cube);
+    // model = glm::rotate(model, glm::radians(-15.0f), glm::vec3(0.0, 1.0, 0.0));
     
     color_cube_s.SetMat4f("view", view);
     color_cube_s.SetMat4f("projection", projection);
