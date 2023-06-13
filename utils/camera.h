@@ -16,7 +16,7 @@ enum class CameraMovement {
 const float YAW         = -90.0f;
 const float PITCH       = 0.0f;
 const float SPEED       = 2.5f;
-const float SENSITIVITY = 0.005;
+const float SENSITIVITY = 0.003;
 const float ZOOM        = 45.0f;
 
 class Camera {
@@ -42,6 +42,7 @@ public:
   Camera(float pos_x, float pos_y, float pos_z, float up_x, float up_y, float up_z, float yaw, float pitch);
 
   auto GetViewMatrix() const -> glm::mat4;
+  auto GetPosition() const -> glm::vec3;
   auto ProcessKeyboard(CameraMovement direction, float delta_time) -> void;
   auto ProcessMouseMovement(float x_offset, float y_offset, GLboolean constrain_pitch = true) -> void;
   auto ProcessMouseScroll(float y_offset) -> void;

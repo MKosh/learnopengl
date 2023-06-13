@@ -3,6 +3,8 @@
 out vec4 FragColor;
 
 in vec2 tex_coords;
+in vec3 normal;
+in vec3 frag_pos;
 
 uniform sampler2D texture_diffuse1;
 uniform sampler2D texture_specular1;

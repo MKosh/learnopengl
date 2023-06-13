@@ -24,6 +24,10 @@ auto Camera::GetViewMatrix() const -> glm::mat4 {
   return glm::lookAt(m_position, m_position + m_front, m_up);
 }
 
+auto Camera::GetPosition() const -> glm::vec3 {
+  return m_position;
+}
+
 auto Camera::ProcessKeyboard(CameraMovement direction, float delta_time) -> void {
   float velocity = m_movement_speed * delta_time;
   if (direction == CameraMovement::FORWARD)

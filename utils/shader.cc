@@ -70,6 +70,10 @@ auto Shader::Delete() const -> void {
 auto Shader::SetVec3f(const std::string& name, float v0, float v1, float v2) -> void {
   glUniform3f(Shader::GetUniformLocation(name), v0, v1, v2);
 }
+
+auto Shader::SetVec3f(const std::string& name, glm::vec3 vec) -> void {
+  glUniform3f(Shader::GetUniformLocation(name), vec.x, vec.y, vec.z);
+}
 auto Shader::SetUniform1i(const std::string &name, int value) -> void {
   glUniform1i(GetUniformLocation(name), value);
 }
